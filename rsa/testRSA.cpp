@@ -43,10 +43,25 @@ int public_encrypt(unsigned char *plain, unsigned char *encrypted)
     int result = RSA_public_encrypt(strlen((char*)plain), plain, encrypted, rsa, padding);
     return result;
 }
-int private_decrypt(unsigned char * enc_data, unsigned char *decrypted)
+
+int public_decrypt(unsigned char *encrypted, unsigned char *decrypted)
+{
+	RSA *rsa = createRSAFilename(m_PublicFile, 1);
+    int result = RSA_public_decrypt(RSA_size(rsa), encrypted, decrypted, rsa, padding);
+    return result;
+}
+
+int private_encrypt (unsigned char *plain, unsigned char *encrypted)
 {
 	RSA *rsa = createRSAFilename(m_PrivateFile, 0);
-    int  result = RSA_private_decrypt(RSA_size(rsa), enc_data, decrypted,rsa, padding);
+    int  result = RSA_private_encrypt(strlen((char*)plain), plain, encrypted, rsa, padding);
+    return result;
+}
+
+int private_decrypt(unsigned char *encrypted, unsigned char *decrypted)
+{
+	RSA *rsa = createRSAFilename(m_PrivateFile, 0);
+    int  result = RSA_private_decrypt(RSA_size(rsa), encrypted, decrypted, rsa, padding);
     return result;
 }
 
@@ -60,7 +75,7 @@ void printLastError(char *msg)
 
 int main (int argc, char** argv)
 {
-	char plain[256];
+	unsigned char plain[256];
 	unsigned char encrypt[256];
 	unsigned char decrypt[256];
 
@@ -70,7 +85,7 @@ int main (int argc, char** argv)
 
 	strcpy((char*)plain, "hello world");
 
-	int encrypted_length= public_encrypt((unsigned char*)plain, encrypt);
+	int encrypted_length= private_encrypt(plain, encrypt);
 	if(encrypted_length == -1)
 	{
 		printLastError((char*)"Public Encrypt failed ");
@@ -78,7 +93,7 @@ int main (int argc, char** argv)
 	}
 	printf("Encrypted length = %d\n",encrypted_length);
 
-	int decrypted_length = private_decrypt(encrypt, decrypt);
+	int decrypted_length = public_decrypt(encrypt, decrypt);
 	if(decrypted_length == -1)
 	{
 		printLastError((char*)"Private Decrypt failed ");
